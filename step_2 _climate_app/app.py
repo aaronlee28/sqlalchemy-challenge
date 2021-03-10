@@ -82,22 +82,27 @@ def tobs():
     return jsonify(tobs)
 
 
-@app.route("/api/v1.0/tobs<start>")
+@app.route("/api/v1.0/<start>")
 def start_date(start):
     # Create our session (link) from Python to the DB
     session = Session(engine)
+    date_tobs = session.query(Measurement.date, Measurement.tobs).all()
+    session.close ()
 
-    start = session.query(Measurement.date)
-    for date in date_1:
-        search_term = start
+    # Create a dictionary
+    all_data = []
+    for date, tobs in date_tobs:
+        datetobs_dict = {}
+        datetobs_dict['date'] = date
+        datetobs_dict['tobs'] = tobs
+        all_data.append(datetobs_dict)
 
-        if search_term == start:
-            return jsonify(session.query(func.min(Measurement.tobs).filter(Measurement.date >= search_term).all())
+    # canonicalized = date.replace('-','')
+    for search_date in all_data:
+        search_term = datetobs_dict['date']
 
-                                                             # Convert list of tuples into normal list 
-tobs = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date.between('2016-08-23', '2017-08-23'),
- all_tobs = list(np.ravel(tobs))
+        if search_term == date:
+            return jsonify(session.query(func.min(Measurement.tobs)).filterall())
 
-                                                                                    
 if __name__ == "__main__":
     app.run(debug=True)
